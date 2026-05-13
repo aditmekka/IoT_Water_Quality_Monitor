@@ -2,21 +2,21 @@
 #include <U8g2lib.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
-#include <ESP8266WiFi.h>
-#include <ESP8266WebServer.h>
+#include <WiFi.h>
+#include <WebServer.h>
 
 #define DEBUG_MODE
 
-#define TDS_SENSOR A0
-#define SW1 D3
-#define TEMP_SENSOR D4
+#define TDS_SENSOR 34
+#define SW1 0
+#define TEMP_SENSOR 26
 
 U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);
 
 OneWire oneWire(TEMP_SENSOR);
 DallasTemperature tempSensor(&oneWire);
 
-ESP8266WebServer server(80);
+WebServer server(80);
 
 const char* ssid = "MonsterchipRP";
 const char* password = "170845G718";
@@ -51,7 +51,7 @@ void loop() {
 
 void wifi_setup(){
     WiFi.mode(WIFI_STA);
-
+    WiFi.setSleep(false);
     WiFi.begin(ssid, password);
 
     u8g2.clearBuffer();
@@ -83,7 +83,6 @@ void wifi_setup(){
 
     server.on("/", handleRoot);
     server.on("/data", handleData);
-
     server.begin();
 
     String ip = WiFi.localIP().toString();
@@ -107,6 +106,9 @@ void start_sequence(void){
         Serial.begin(115200);
     #endif
     
+    analogReadResolution(12);
+    analogSetAttenuation(ADC_11db);
+
     pinMode(SW1, INPUT_PULLUP);
     pinMode(TDS_SENSOR, INPUT);
 
@@ -164,7 +166,7 @@ void sample(uint8_t sample_s){
         last_sample_tick = current_tick;
 
         int raw = analogRead(TDS_SENSOR);
-        float voltage = raw * (3.3 / 1023.0);
+        float voltage = raw * (3.3 / 4095.0);
         electrical_conductivity = voltage * 2.0;
         ppm = electrical_conductivity * 500.0;
 
