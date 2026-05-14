@@ -334,6 +334,21 @@ h1{
 
 <script>
 
+function formatUptime(seconds){
+
+    seconds = Number(seconds);
+
+    const days = Math.floor(seconds / 86400);
+    seconds %= 86400;
+
+    const hours = Math.floor(seconds / 3600);
+    seconds %= 3600;
+
+    const minutes = Math.floor(seconds / 60);
+    seconds %= 60;
+
+    return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+}
 async function updateData(){
 
     try{
@@ -344,7 +359,7 @@ async function updateData(){
         document.getElementById('temp').innerText = data.temperature;
         document.getElementById('ec').innerText = data.ec;
         document.getElementById('ppm').innerText = data.ppm;
-        document.getElementById('uptime').innerText = data.uptime;
+        document.getElementById('uptime').innerText = formatUptime(Number(data.uptime));
 
     }catch(e){
         console.log(e);
